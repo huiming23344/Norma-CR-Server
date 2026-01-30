@@ -10,11 +10,11 @@ import (
 )
 
 type mysqlConfig struct {
-	Host   string
-	Port   int
-	User   string
-	Pass   string
-	DBName string
+	Host   string `yaml:"host"`
+	Port   int    `yaml:"port"`
+	User   string `yaml:"user"`
+	Pass   string `yaml:"pass"`
+	DBName string `yaml:"db_name"`
 }
 
 type CrAgentRun struct {
@@ -68,15 +68,7 @@ func (CodeChangeSummary) TableName() string {
 	return "code_change_summary"
 }
 
-func openDB() (*gorm.DB, error) {
-	cfg := mysqlConfig{
-		Host:   "bjdd-bcc-ctrl-rdtest-02.bjdd.baidu.com",
-		Port:   8979,
-		User:   "appuser",
-		Pass:   "StrongPass!",
-		DBName: "cr-agent",
-	}
-
+func openDB(cfg mysqlConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.User,

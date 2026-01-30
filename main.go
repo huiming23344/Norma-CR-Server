@@ -38,7 +38,12 @@ type errResponse struct {
 }
 
 func main() {
-	db, err := openDB()
+	cfg, err := loadConfig("config.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := openDB(cfg.MySQL)
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +71,11 @@ func main() {
 		c.JSON(http.StatusOK, okResponse{OK: true, RunPrimaryID: runID, Idempotent: idempotent})
 	})
 
-	if err := r.Run(":8869"); err != nil {
+	addr := cfg.Server.Addr
+	if addr == "" {
+		addr = ":8869"
+	}
+	if err := r.Run(addr); err != nil {
 		panic(err)
 	}
 }
