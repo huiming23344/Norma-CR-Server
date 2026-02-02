@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -49,9 +50,10 @@ func main() {
 	if logFile == "" {
 		logFile = "gin.log"
 	}
-	logWriter, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	logWriter, err := openLogWriter(logFile)
 	if err != nil {
-		panic(err)
+		log.Printf("failed to open log file %q, fallback to stdout: %v", logFile, err)
+		logWriter = os.Stdout
 	}
 	log.SetOutput(logWriter)
 
@@ -63,6 +65,19 @@ func main() {
 	r := gin.New()
 	r.Use(gin.LoggerWithWriter(logWriter))
 	r.Use(gin.Recovery())
+	r.GET("/", serveDashboard)
+	r.GET("/api/summary", handleSummary(db))
+	r.GET("/api/timeseries", handleTimeseries(db))
+	r.GET("/api/runs/recent", handleRecentRuns(db))
+	r.GET("/api/rules/top", handleTopRules(db))
+	r.GET("/api/change-effectiveness/summary", handleChangeEffectivenessSummary(db))
+	r.GET("/api/change-effectiveness/top", handleChangeEffectivenessTop(db))
+	r.GET("/api/change-effectiveness/list", handleChangeEffectivenessList(db))
+	r.GET("/api/change-effectiveness/runs", handleChangeEffectivenessRuns(db))
+	r.GET("/api/rule-quality/summary", handleRuleQualitySummary(db))
+	r.GET("/api/rule-quality/top", handleRuleQualityTop(db))
+	r.GET("/api/rule-quality/list", handleRuleQualityList(db))
+	r.GET("/api/rule-quality/trend", handleRuleQualityTrend(db))
 	r.POST("/v1/metrics/agent-runs", func(c *gin.Context) {
 		var req agentRunRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -92,6 +107,16 @@ func main() {
 	if err := r.Run(addr); err != nil {
 		panic(err)
 	}
+}
+
+func openLogWriter(path string) (*os.File, error) {
+	dir := filepath.Dir(path)
+	if dir != "." && dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, err
+		}
+	}
+	return os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 }
 
 func normalizeDiffLines(diffLines *uint32) (uint32, string) {
