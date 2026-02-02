@@ -11,6 +11,10 @@ type Config struct {
 		Addr string `yaml:"addr"`
 	} `yaml:"server"`
 
+	Logging struct {
+		File string `yaml:"file"`
+	} `yaml:"logging"`
+
 	MySQL mysqlConfig `yaml:"mysql"`
 }
 

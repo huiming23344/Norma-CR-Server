@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -43,12 +45,24 @@ func main() {
 		panic(err)
 	}
 
+	logFile := cfg.Logging.File
+	if logFile == "" {
+		logFile = "gin.log"
+	}
+	logWriter, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		panic(err)
+	}
+	log.SetOutput(logWriter)
+
 	db, err := openDB(cfg.MySQL)
 	if err != nil {
 		panic(err)
 	}
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.LoggerWithWriter(logWriter))
+	r.Use(gin.Recovery())
 	r.POST("/v1/metrics/agent-runs", func(c *gin.Context) {
 		var req agentRunRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
