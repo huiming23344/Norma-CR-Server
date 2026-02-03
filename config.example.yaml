@@ -1,0 +1,12 @@
+server:
+  addr: ":8869"
+
+logging:
+  file: "./log/cr-agent-server.example.log"
+
+mysql:
+  host: "192.0.2.10"
+  port: 3306
+  user: "example_user"
+  pass: "ExamplePass123!"
+  db_name: "cr-agent-example"

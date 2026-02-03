@@ -1,6 +1,7 @@
 # CR Agent Server
 
 这是一个轻量级的 Go 服务，用于接收代码评审 Agent 的运行指标，写入 MySQL，并提供仪表盘与分析接口。
+![Dashboard](doc/image.png)
 
 **功能概述**
 - 接收并落库 Agent 运行指标，支持 `(repo, code_change_id, agent_run_id)` 幂等写入
@@ -55,10 +56,4 @@ mysql:
 **文档**
 - [API 说明](doc/api.md)
 
-**图示**
-![Dashboard](doc/image.png)
 
-**构建**
-```bash
-go build -o cr-agent-server .
-```
