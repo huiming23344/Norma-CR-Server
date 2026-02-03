@@ -1,0 +1,12 @@
+# Config files (keep templates in repo if needed)
+config.yaml
+config.local.yaml
+config.*.local.yaml
+
+# Binaries
+cr-agent-server
+*.exe
+*.out
+*.bin
+*.dylib
+*.so
